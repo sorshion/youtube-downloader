@@ -80,28 +80,30 @@ class YouTubeDownloader
         $response = $this->client->post("https://www.youtube.com/youtubei/v1/player?key=" . $configData->getApiKey(), json_encode([
             "context" => [
                 "client" => [
-                    "androidSdkVersion" => 30,
-                    "clientName" => "ANDROID",
-                    "clientVersion" => "18.11.34",
+                    'clientName' => 'IOS',
+                    'clientVersion' =>  '19.09.3',
+                    'deviceModel'=>  'iPhone14,3',
+                    'userAgent' =>  'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)',
                     "hl" => "en",
                     "timeZone" => "UTC",
-                    "userAgent" => "com.google.android.youtube/18.11.34 (Linux; U; Android 11) gzip",
-                    "utcOffsetMinutes" => 0
+                    "utcOffsetMinutes" => 0,
                 ]
             ],
-            "params" => "CgIQBg==",
             "videoId" => $video_id,
             "playbackContext" => [
                 "contentPlaybackContext" => [
                     "html5Preference" => "HTML5_PREF_WANTS"
                 ]
             ],
-            "racyCheckOk" => true
+            "racyCheckOk" => true,
+            'contentCheckOk' => True,
         ]), [
             'Content-Type' => 'application/json',
+            'Origin' => 'https://www.youtube.com',
             'X-Goog-Visitor-Id' => $configData->getGoogleVisitorId(),
             'X-Youtube-Client-Name' => $configData->getClientName(),
-            'X-Youtube-Client-Version' => $configData->getClientVersion()
+            'X-Youtube-Client-Version' => $configData->getClientVersion(),
+            'User-Agent'=> 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)',
         ]);
 
         return new PlayerApiResponse($response);
