@@ -18,7 +18,34 @@ class YouTubeDownloader
 {
     protected Browser $client;
 
-    function __construct()
+    private $defaultClient = 'android';
+
+    private $clientBodyConfig = [
+        'android' => [
+            'context' => [
+                'client' => [
+                    'clientName' => 'ANDROID',
+                    'clientVersion' => '19.09.37',
+                    'androidSdkVersion' => 30,
+                    'userAgent' => 'com.google.android.youtube/19.09.37(Linux; U; Android 11) gzip'
+                ],
+            ],
+            'params' => 'CgIIAQ=='
+           
+        ],
+        'ios' => [
+            'context' => [
+                'client' => [
+                    'clientName' => 'IOS',
+                    'clientVersion' => '19.09.3',
+                    'deviceModel'=> 'iPhone14,3',
+                    'userAgent' => 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)'
+                ],
+            ],
+        ]
+    ];
+
+    public function __construct()
     {
         $this->client = new Browser();
     }
@@ -27,6 +54,11 @@ class YouTubeDownloader
     public function getBrowser(): Browser
     {
         return $this->client;
+    }
+
+    public function setDefaultClient($defaultClient)
+    {
+        $this->defaultClient = $defaultClient;
     }
 
     /**
@@ -76,35 +108,38 @@ class YouTubeDownloader
     // Downloading android player API JSON
     protected function getPlayerApiResponse(string $video_id, YouTubeConfigData $configData): PlayerApiResponse
     {
-        // exact params matter, because otherwise "slow" download links will be returned
-        $response = $this->client->post("https://www.youtube.com/youtubei/v1/player?key=" . $configData->getApiKey(), json_encode([
-            "context" => [
-                "client" => [
-                    'clientName' => 'IOS',
-                    'clientVersion' =>  '19.09.3',
-                    'deviceModel'=>  'iPhone14,3',
-                    'userAgent' =>  'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)',
-                    "hl" => "en",
-                    "timeZone" => "UTC",
-                    "utcOffsetMinutes" => 0,
+        $clientBodyConfig = $this->clientBodyConfig[$this->defaultClient];
+        $defaultBody = [
+            'videoId' => $video_id,
+            'playbackContext' => [
+                'contentPlaybackContext' => [
+                    'html5Preference' => 'HTML5_PREF_WANTS'
                 ]
             ],
-            "videoId" => $video_id,
-            "playbackContext" => [
-                "contentPlaybackContext" => [
-                    "html5Preference" => "HTML5_PREF_WANTS"
-                ]
-            ],
-            "racyCheckOk" => true,
+            'racyCheckOk' => true,
             'contentCheckOk' => True,
-        ]), [
+            'context' => [
+                'client' => [
+                    'hl' => 'en',
+                    'timeZone' => 'UTC',
+                    'utcOffsetMinutes' => 0,
+                ],
+            ],
+        ];
+
+        $body = array_merge_recursive($defaultBody, $clientBodyConfig);
+
+        $header = [
             'Content-Type' => 'application/json',
             'Origin' => 'https://www.youtube.com',
             'X-Goog-Visitor-Id' => $configData->getGoogleVisitorId(),
             'X-Youtube-Client-Name' => $configData->getClientName(),
             'X-Youtube-Client-Version' => $configData->getClientVersion(),
-            'User-Agent'=> 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)',
-        ]);
+            'User-Agent'=> $clientBodyConfig['context']['client']['userAgent'],
+        ];
+
+        // exact params matter, because otherwise "slow" download links will be returned
+        $response = $this->client->post("https://www.youtube.com/youtubei/v1/player?key=" . $configData->getApiKey(), json_encode($body), $header);
 
         return new PlayerApiResponse($response);
     }
