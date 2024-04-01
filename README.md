@@ -66,7 +66,7 @@ For typical usage, you are probably interested in dealing with combined streams,
 - Stream YouTube videos directly from your server:
 
 ```php
-$youtube = new \YouTube\YouTubeStreamer();
+$youtube = new \Sorshion\YouTube\YouTubeStreamer();
 $youtube->stream('https://r4---sn-n4v7knll.googlevideo.com/videoplayback?...');
 ```
 
