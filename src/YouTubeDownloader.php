@@ -18,7 +18,7 @@ class YouTubeDownloader
 {
     protected Browser $client;
 
-    private $defaultClient = 'android';
+    private $defaultClient = 'android_music';
 
     private $clientBodyConfig = [
         'android' => [
@@ -31,7 +31,16 @@ class YouTubeDownloader
                 ],
             ],
             'params' => 'CgIIAQ=='
-           
+        ],
+        "android_music" => [
+            "context" => [
+                "client" => [
+                    "androidSdkVersion" => 30,
+                    "clientName" => "ANDROID_MUSIC",
+                    "clientVersion" => "6.42.52",
+                    "userAgent" => "com.google.android.apps.youtube.music/6.42.52 (Linux; U; Android 11) gzip",
+                ],
+            ],
         ],
         'ios' => [
             'context' => [
@@ -42,7 +51,15 @@ class YouTubeDownloader
                     'userAgent' => 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)'
                 ],
             ],
-        ]
+        ],
+        "web" => [
+            "context" => [
+                "client" => [
+                    "clientName" => "WEB",
+                    "clientVersion" => "2.20220801.00.00",
+                ],
+            ],
+        ],
     ];
 
     public function __construct()
